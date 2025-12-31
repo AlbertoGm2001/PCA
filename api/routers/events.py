@@ -11,13 +11,18 @@ router = APIRouter(prefix="/events", tags=["events"])
 # --- User Endpoints ---
 
 @router.get("", response_model=List[Event])
-def list_events(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+def list_events(
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(get_current_user),
+    limit: int = 100
+):
     logger.info(f"Listing events for user: {current_user.email}")
     level = current_user.level
     query = select(Event)
     if level is not None:
         query = query.where(Event.min_level <= level)
-    events = session.exec(query).all()
+    
+    events = session.exec(query.limit(limit)).all()
     logger.success(f"Retrieved {len(events)} events")
     return events
 

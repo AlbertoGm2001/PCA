@@ -11,7 +11,11 @@ router = APIRouter(prefix="/classes", tags=["classes"])
 # --- User Endpoints ---
 
 @router.get("", response_model=List[Class])
-def list_classes(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+def list_classes(
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(get_current_user),
+    limit: int = 100
+):
     logger.info(f"Listing classes for user: {current_user.email}")
     
     if current_user.classes_to_recover <= 0:
@@ -22,7 +26,8 @@ def list_classes(session: Session = Depends(get_session), current_user: User = D
     level = current_user.level
     if level is not None: 
         query = query.where(Class.level_required <= level)
-    classes = session.exec(query).all()
+    
+    classes = session.exec(query.limit(limit)).all()
     logger.success(f"Retrieved {len(classes)} classes")
     return classes
 

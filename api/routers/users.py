@@ -9,9 +9,13 @@ from api.security import get_password_hash, get_admin_user, get_current_user
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("", response_model=List[User])
-def list_users(session: Session = Depends(get_session), current_user: User = Depends(get_admin_user)):
-    logger.info("Listing all users")
-    users = session.exec(select(User)).all()
+def list_users(
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(get_admin_user),
+    limit: int = 100
+):
+    logger.info(f"Listing users with limit={limit}")
+    users = session.exec(select(User).limit(limit)).all()
     logger.success(f"Retrieved {len(users)} users")
     return users
 

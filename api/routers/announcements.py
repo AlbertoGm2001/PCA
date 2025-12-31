@@ -9,9 +9,13 @@ from api.security import get_current_user, get_admin_user, User
 router = APIRouter(prefix="/announcements", tags=["announcements"])
 
 @router.get("", response_model=List[Announcement])
-def get_announcements(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    logger.info("Fetching all announcements")
-    announcements = session.exec(select(Announcement).order_by(Announcement.created_at.desc())).all()
+def list_announcements(
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(get_current_user),
+    limit: int = 100
+):
+    logger.info(f"Listing announcements with limit={limit}")
+    announcements = session.exec(select(Announcement).order_by(Announcement.created_at.desc()).limit(limit)).all()
     logger.success(f"Retrieved {len(announcements)} announcements")
     return announcements
 
